@@ -15,7 +15,7 @@
 #' @param cumu.RainFall vector containing time intervals for cumulative rainfall. I.e. c(24, 48, 96) for 1, 2 and 4 days aggregation. Default: NULL
 #' @param return.DataFrame only the rain events are returned as a data.frame. Default: FALSE
 #' @param S1.rainThresh isolated rainfall measurements below this thresholds are removed in the first step. Default: 0.2
-#' @param S3.rainThresh exclusion of irrelevant rainfall sub-events under and equal to this threshold (third step). Default: 1 [mm]
+#' @param S3.rainThresh exclusion of irrelevant rainfall sub-events under and equal to this threshold (third step). Default: 1 (in mm)
 #' @param S1.rainOffLength dry periods between isolated rain events in the first step. Default: c(3, 6) (hours). When dates is NULL, then the smallest values is used for separation.
 #' @param S2.rainOffLength dry periods between rainfall sub-events in the second step. Default: c(6, 12) (hours). When dates is NULL, then the smallest values is used for separation.
 #' @param S4.rainOffLength dry periods between rainfall sub-events in the second step. Default: c(48, 96) (hours). When dates is NULL, then the smallest values is used for separation.
@@ -72,7 +72,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 
   if(length(index.month.warm.season) != 2 | max(index.month.warm.season) > 12 | min(index.month.warm.season) < 1)
   {
-    Stop('Function argument "index.month.warm.season" is wrongly defined')
+    stop('Function argument "index.month.warm.season" is wrongly defined')
   }
 
   # if(type != "daily" & type != "hourly")
@@ -196,7 +196,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ## Step 1: Detection and exclusion of isolated rainfall measurements --------------------------
   # ... find isolated rainfall (rainThresh must be fix to 0)
-  S1.isolRF <- findRainFallPosition(x = x, dates = dates, rainThresh = c(0, 0), rainOffLength = S1.rainOffLength,
+  S1.isolRF <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0, 0), rainOffLength = S1.rainOffLength,
                                     op.rainThresh = ">", op.rainOffLength = "<=",
                                     index.month.warm.season = index.month.warm.season)
 
@@ -208,10 +208,10 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ## Step 2: Identification of rainfall sub-events ----------------------------------------------
-  S2.DryPeriods <- findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S2.rainOffLength,
+  S2.DryPeriods <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S2.rainOffLength,
                                         op.rainThresh = "==", op.rainOffLength = ">=",
                                         index.month.warm.season = index.month.warm.season)
-  S2.RainEvents <- findRainEvent(x = x, x.pos.dryPeriods = S2.DryPeriods)
+  S2.RainEvents <- .findRainEvent(x = x, x.pos.dryPeriods = S2.DryPeriods)
 
 
   # ... sum of precipitation of sub-rain-events
@@ -238,10 +238,10 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ## Step 4/5: Identification of rainfall events --------------------------------------------------
-  S4.DryPeriods <- findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S4.rainOffLength,
+  S4.DryPeriods <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S4.rainOffLength,
                                         op.rainThresh = "==", op.rainOffLength = ">=",
                                         index.month.warm.season = index.month.warm.season)
-  S4.RainEvents <- findRainEvent(x = x, x.pos.dryPeriods = S4.DryPeriods)
+  S4.RainEvents <- .findRainEvent(x = x, x.pos.dryPeriods = S4.DryPeriods)
 
   ## ... get rainfall metrics
   # general
@@ -271,14 +271,14 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
   if(all.RainEvent)
   {
     # all rain event data
-    cERM <- calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S4.RainEvents, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
+    cERM <- .calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S4.RainEvents, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
 
     # ... gsub s in names
     names(cERM) <- gsub(pattern = "^(s)", replacement = "", x = names(cERM))
 
   } else {
     # critical rain event
-    cERM <- calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S4.RainEvents, modus = "main", RD = RD, MAP = MAP, RDN = RDN)
+    cERM <- .calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S4.RainEvents, modus = "main", RD = RD, MAP = MAP, RDN = RDN)
 
   }
 
@@ -306,8 +306,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
       cERM.S6.SubEvents <- lapply(X = 1:length(S4.RainEvents), FUN = function(i, S4RE, S3RE, precip, dates, RD, MAP, RDN)
       {
 
-        # browser()
-        # ... get max and min index
+           # ... get max and min index
         # ... ... find nearest min index
         S3RE.minIndices <- sapply(X = S3RE, FUN = min)
         S4RE.minIndex.pos <- unname(which.min(abs(S3RE.minIndices - min(S4RE[[i]]))))
@@ -322,7 +321,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
         S6SE <- S3RE[which(S6SRE.check.min & S6SRE.check.max)]
 
         # ... calculate rainfall metrics
-        cERM.sub <- calcEventRainfallMetrics(x = precip, dates = dates, list.RainEvents = S6SE, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
+        cERM.sub <- .calcEventRainfallMetrics(x = precip, dates = dates, list.RainEvents = S6SE, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
         names(cERM.sub) <- paste0(names(cERM.sub), "_", stringr::str_pad(string = i, width = 2, side = "left", pad = "0")) # naming
 
         return(cERM.sub)
@@ -337,7 +336,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
       # S6.SubEvents.Names <- gsub(pattern = "\\." , replacement = "_" , names(S6.SubEvents.fl))
 
       # ... calculate sub-event rainfall metrics
-      # cERM.sub <- calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents =  S6.SubEvents.fl, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
+      # cERM.sub <- .calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents =  S6.SubEvents.fl, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
 
       # ... rename items
       # cERM.sub.NumNames <- paste0(paste0(c(1:length(S4.RainEvents)), "_"), unlist(sapply(X = 1:length(S6.SubEvents.LenName), FUN = function(x, n){rep(x, n[x])}, n = S6.SubEvents.LenName)))
@@ -354,7 +353,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 
       # if(length(S6.SubEvents) > 1) # > 1, because 1 would be similar to the critical rainfall event
       # {
-      cERM.sub <- calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S6.SubEvents, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
+      cERM.sub <- .calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S6.SubEvents, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
       res <- c(res, cERM.sub)
       # }
     } # end of if(all.RainEvent)
@@ -368,7 +367,6 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 
   if(return.DataFrame)
   {
-    # browser()
 
     # if(sub.RainEvent && length(S6.SubEvents) > 1)
     if(sub.RainEvent & !flag.zero)
@@ -472,7 +470,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 
 
         # ... set names
-        colnames(res.df) <-  res.colNames
+        colnames(res.df) <- res.colNames
 
         # ... set items to data frame
         items.res <- res[which(names(res) %in% items)]
@@ -551,7 +549,7 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
   }
 
 
-} # end of function getRainEventData()
+} # end of function CTRL()
 
 
 
@@ -573,14 +571,15 @@ CTRL <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.
 #' This function calcuates different precipitation metrics.
 #'
 #' @param x vector containing precipitation
+#' @param dates see CTRL()
 #' @param list.RainEvents list containing indices of rain events
 #' @param modus modus of calculation of rain metrics. "sub" of sub-rainfall events or "main" for critical rainfall event
-#' @param ... for RD, MAP or RDN
+#' @param RD see CTRL()
+#' @param MAP see CTRL()
+#' @param RDN see CTRL()
 #' @return
 #' vector containing rainfall metrics
-#'
-#' @export
-calcEventRainfallMetrics <- function(x, dates, list.RainEvents, modus, RD = RD, MAP = MAP, RDN = RDN)
+.calcEventRainfallMetrics <- function(x, dates, list.RainEvents, modus, RD = RD, MAP = MAP, RDN = RDN)
 {
 
   ## cumulative rainfall
@@ -622,7 +621,7 @@ calcEventRainfallMetrics <- function(x, dates, list.RainEvents, modus, RD = RD, 
 
 
     ## weighted mean intensity of rain events
-    RE.wID <- weighted.mean(x = RE.sum/RE.dur, w = RE.dur, na.rm = TRUE)
+    RE.wID <- stats::weighted.mean(x = RE.sum/RE.dur, w = RE.dur, na.rm = TRUE)
     names(RE.wID) <- "RE_weightIntensity"
 
     # normalizations
@@ -729,7 +728,7 @@ calcEventRainfallMetrics <- function(x, dates, list.RainEvents, modus, RD = RD, 
 
 
     ## weighted mean intensity of sub rain events
-    RE.wID <- weighted.mean(x = RE.sum/RE.dur, w = RE.dur, na.rm = TRUE)
+    RE.wID <- stats::weighted.mean(x = RE.sum/RE.dur, w = RE.dur, na.rm = TRUE)
     names(RE.wID) <- "sRE_weightIntensity"
 
     # normalizations
@@ -872,11 +871,10 @@ calcEventRainfallMetrics <- function(x, dates, list.RainEvents, modus, RD = RD, 
 #' @param rainOffLength modus of calculation of rain metrics. "sub" of sub-rainfall events or "main" for critical rainfall event
 #' @param op.rainThresh operator for rain-threshold: x OP rainThresh
 #' @param op.rainOffLength operator for rainOff-threshold: lengths of event OP rainOffLength-Threshold
+#' @param index.month.warm.season index of month belonging to warm season
 #' @return
 #' vector containing indices of x corresponding to specific selection.
-#'
-#' @export
-findRainFallPosition <- function(x, dates, rainThresh, rainOffLength, op.rainThresh, op.rainOffLength,
+.findRainFallPosition <- function(x, dates, rainThresh, rainOffLength, op.rainThresh, op.rainOffLength,
                                  index.month.warm.season)
 {
   # browser()
@@ -955,9 +953,7 @@ findRainFallPosition <- function(x, dates, rainThresh, rainOffLength, op.rainThr
 #' @param x.pos.dryPeriods indices of x containing dry periods. Result of findRainFallPosition.
 #' @return
 #' list containing rain events as specific indices of x.
-#'
-#' @export
-findRainEvent <- function(x = x, x.pos.dryPeriods)
+.findRainEvent <- function(x = x, x.pos.dryPeriods)
 {
   # browser()
 

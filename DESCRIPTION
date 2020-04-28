@@ -1,16 +1,45 @@
 Package: RainSlide
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+Type: Package
+Title: Rainfall-induced landslide analysis tools
+Version: 0.01
+Date: 2020-04-27
+Authors@R: c(
+        person("Raphael", "Knevels", 
+        email = "raphael.knevels@uni-jena.de",
+        role = c("aut", "cre")
+        ))
+Description: Tools for rainfall-induced landslide analysis. 
+URL: https://github.com/raff-k/RainSlide
+BugReports: https://github.com/raff-k/RainSlide/issues
+License: GPL (>= 2)
 Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
+Roxygen: list(markdown = TRUE)
+LazyData: true
+Depends: 
+         R (>= 3.3)
+Imports: 
+         boot,
+         dplyr,
+         future,
+         future.apply,
+         ggplot2,
+         MASS,
+         methods,
+         rgrass7,
+         quantreg,
+         sf,
+         stats,
+         stringr,
+         raster,
+         zoo
+Suggests: 
+         link2GI,
+         magrittr,
+         testthat, 
+         knitr,
+         rmarkdown,
+         pacman,
+         magick
+VignetteBuilder: knitr
+

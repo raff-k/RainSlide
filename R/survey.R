@@ -130,7 +130,7 @@ survey <- function(elev, pts, ID = NULL, maxdist = 1000, do.extend = FALSE, path
   {
     cat("... init parallelisation mode \n")
     cat("... ... is NOT supported at the moment! \n")
-    future::plan(sequential)
+    future::plan(future::sequential)
     # future::plan(list(future::tweak(future::multiprocess, workers = cores)))
 
     # cat("... init mapsets for every point observation \n")
@@ -152,7 +152,7 @@ survey <- function(elev, pts, ID = NULL, maxdist = 1000, do.extend = FALSE, path
     #   mapset = "PERMANENT"))
 
   } else {
-    future::plan(sequential)
+    future::plan(future::sequential)
     list.mapsets <- NULL
   }
 
@@ -162,17 +162,6 @@ survey <- function(elev, pts, ID = NULL, maxdist = 1000, do.extend = FALSE, path
   # STARTING LOOP ----------------------------------------
   results <- future.apply::future_lapply(X = 1:nrow(pts), FUN = function(i, pts, ID, pts.coord, pts.xy, pts.elev, r.extent, maxdist, maxdist.x, maxdist.y, dim.max, show.output.on.console, quiet, path.temp, list.mapsets, memory)
   {
-    # browser()
-
-    # if(!is.null(list.mapsets))
-    # {
-    #   mapsets.i <- list.mapsets[[i]]
-    #
-    #   # change to current mapset
-    #   rgrass7::execGRASS("g.mapset", flags = c("overwrite"), Sys_show.output.on.console = T, parameters = list(
-    #     mapset = mapset.i))
-    # }
-
 
     ## remove files in GRASS GIS session
     # print(parseGRASS("g.remove"))
@@ -312,7 +301,7 @@ survey <- function(elev, pts, ID = NULL, maxdist = 1000, do.extend = FALSE, path
   show.output.on.console = show.output.on.console, quiet = quiet, memory = memory, path.temp = path.temp, r.extent = r.extent, list.mapsets = list.mapsets) # end of loop
 
 
-  if(cores > 1) future:::ClusterRegistry("stop")
+  # if(cores > 1) future:::ClusterRegistry("stop") # interal calls are not allowed!
 
   ## .... check data
   results.angle <- lapply(X = results, FUN = function(x) x$angle) # %>%
@@ -392,7 +381,7 @@ survey <- function(elev, pts, ID = NULL, maxdist = 1000, do.extend = FALSE, path
 
   # get time of process
   process.time.run <- proc.time() - process.time.start
-  if(!quiet) cat(paste0("------ Run of effSurvArea: " , round(x = process.time.run["elapsed"][[1]]/60, digits = 4), " Minutes \n"))
+  if(!quiet) cat(paste0("------ Run of RainSlide::survey() " , round(x = process.time.run["elapsed"][[1]]/60, digits = 4), " Minutes \n"))
 
 
   if(return.geom)
@@ -404,5 +393,5 @@ survey <- function(elev, pts, ID = NULL, maxdist = 1000, do.extend = FALSE, path
                 distance = xxtemp4))
   }
 
-} # end of function effSurvArea
+} # end of function survey
 
