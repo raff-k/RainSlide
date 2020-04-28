@@ -65,6 +65,8 @@ duration of critical rainfall event, critical rainfall intensitiy (normalized by
 rainfall intensity at day of failure (start date), maximum rainfall at day of failure (start date).
 }
 \note{
+The use of method = "NLS" is not recommended.
+
 \itemize{
 \item Brunetti, M. T., Peruccacci, S., Rossi, M., Luciani, S., Valigi, D., & Guzzetti, F. (2010). Rainfall thresholds for the possible occurrence of landslides in Italy. Natural Hazards and Earth System Sciences, 10(3), 447.
 \item Peruccacci, S., Brunetti, M. T., Luciani, S., Vennari, C., & Guzzetti, F. (2012). Lithological and seasonal control on rainfall thresholds for the possible initiation of landslides in central Italy. Geomorphology, 139, 79-90.

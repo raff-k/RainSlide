@@ -79,12 +79,21 @@ summary.RainSlideThresh <- function(object, ...){
     if(object$setting$bootstrapping)
     {
         cat("\nBootstrapped confidence intervals:\n")
-        cat("alpha:\t", "+", object$boot$alpha$q95_sigma, "\t", "-", object$boot$alpha$q5_sigma, "\n")
-        cat("gamma:\t", "+", object$boot$gamma$q95, "\t", "-", object$boot$gamma$q5, "\n")
 
         if(object$setting$method == "NLS")
         {
-               cat("t:\t", "+", object$boot$t$q95_sigma, "\t", "-", object$boot$t$q5_sigma, "\n")
+            cat("alpha:\t", "+", object$boot$alpha$q95-object$alpha, "\t", "-", object$alpha-object$boot$alpha$q5, "\n")
+
+        } else {
+            cat("alpha:\t", "+", object$boot$alpha$q95_sigma-object$alpha, "\t", "-", object$alpha-object$boot$alpha$q5_sigma, "\n")
+
+        }
+
+        cat("gamma:\t", "+", object$boot$gamma$q95-object$gamma, "\t", "-", object$gamma-object$boot$gamma$q5, "\n")
+
+        if(object$setting$method == "NLS")
+        {
+               cat("t:\t", "+", object$boot$t$q95_sigma-object$t, "\t", "-", object$t-object$boot$t$q5_sigma, "\n")
         }
     }
 

@@ -22,6 +22,8 @@
 #' @param seed replicable bootstrapping. Default: 123
 #' @param cores If cores > 1 than parallisation for bootstrapping is initialized via future backend. Default: 1
 #'
+#' @note The use of method = "NLS" is not recommended.
+#'
 #' @return vector containing rainfall metrics (see description). If return.DataFrame is TRUE a data.frame is returned containing similar rain metrics for all rain events.
 #'
 #'
@@ -202,8 +204,11 @@ thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, tra
             if (bootstrapping) {
                 # ... confidence interval: shift of intercept
                 boot.result$t$q5_sigma <- boot.result$t$q5 - sigma.coef * m.PDF.sigma  # ... lower percentile
-                data$lower <- funct(x = D, t = boot.result$t$q5_sigma, alpha = alpha, gamma = gamma)
                 boot.result$t$q95_sigma <- boot.result$t$q95 - sigma.coef * m.PDF.sigma  # ... upper percentile
+
+                if(boot.result$t$q5_sigma == boot.result$t$q95_sigma){boot.result$t$q95_sigma <- boot.result$t$q95_sigma %>% abs(.)}
+
+                data$lower <- funct(x = D, t = boot.result$t$q5_sigma, alpha = alpha, gamma = gamma)
                 data$upper <- funct(x = D, t = boot.result$t$q95_sigma, alpha = alpha, gamma = gamma)
             }
 
