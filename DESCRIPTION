@@ -1,7 +1,7 @@
 Package: RainSlide
 Type: Package
 Title: Rainfall-induced landslide analysis tools
-Version: 0.01
+Version: 0.0.0-9000
 Date: 2020-04-27
 Authors@R: c(
         person("Raphael", "Knevels", 
