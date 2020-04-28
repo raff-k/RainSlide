@@ -1,3 +1,24 @@
 language: r
 warnings_are_errors: true
 sudo: required
+
+r_build_args: '--compact-vignettes="gs+qpdf"'
+
+addons:
+  apt:
+    update: true
+    sources:
+       - sourceline: 'ppa:opencpu/imagemagick'
+       - sourceline: 'ppa:ubuntugis/ppa'
+    packages:
+       - libgdal-dev
+       - libudunits2-dev
+       - libmagick++-dev
+       - librsvg2-dev
+       - libwebp-dev
+       - libpoppler-cpp-dev
+       - libtesseract-dev
+       - libleptonica-dev
+       - tesseract-ocr-eng
+       - libfftw3-dev
+       - cargo
