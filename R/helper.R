@@ -1,6 +1,8 @@
 utils::globalVariables(c(".", "%>%", "D", "fit", "upper", "lower"))
 
-#' plot
+
+
+#' @name plot
 #' @param x object of class RainSlideThresh
 #' @param col.pts colour of ED-pair points. Default: 'darkblue'
 #' @param size.pts size of ED-pair points. Default: 1
@@ -12,27 +14,9 @@ utils::globalVariables(c(".", "%>%", "D", "fit", "upper", "lower"))
 #' @param linetype.ci linetype of confidence interval. Default: 'dashed'
 #' @param fill.ci inner fill of confidence interval. Default: 'grey'
 #' @param alpha.ci transparency of confidence interval fill. Default: 0.4
-#' @keywords internal
+#' @method plot RainSlideThresh
 #' @export
-plot <- function(x, y, ...){
-    UseMethod("plot")
-}
-
-
-
-#' @rdname plot.RainSlideThresh
-#' @param x object of class RainSlideThresh
-#' @param col.pts colour of ED-pair points. Default: 'darkblue'
-#' @param size.pts size of ED-pair points. Default: 1
-#' @param shape.pts shape of ED-pair points. Default: 16
-#' @param col.line colour of threshold line. Default: 'black'
-#' @param size.line size of threshold line. Default: 0.8
-#' @param col.line.ci colour of confidence interval line. Default: 'darkgrey'
-#' @param size.line.ci size of confidence interval line. Default: 0.6
-#' @param linetype.ci linetype of confidence interval. Default: 'dashed'
-#' @param fill.ci inner fill of confidence interval. Default: 'grey'
-#' @param alpha.ci transparency of confidence interval fill. Default: 0.4
-plot.RainSlideThresh <- function(x, y = NULL, col.pts = "darkblue", size.pts = 1, shape.pts = 16,
+plot.RainSlideThresh <- function(x, ..., col.pts = "darkblue", size.pts = 1, shape.pts = 16,
     col.line = "black", size.line = 0.8, col.line.ci = "darkgrey", size.line.ci = 0.6, linetype.ci = "dashed", fill.ci = "grey",
     alpha.ci = 0.4) {
 
@@ -64,4 +48,46 @@ plot.RainSlideThresh <- function(x, y = NULL, col.pts = "darkblue", size.pts = 1
 
 }
 
-setGeneric("plot", plot.RainSlideThresh)
+#' @name summary
+#' @param object an object for which a summary is desired
+#' @method summary RainSlideThresh
+#' @export
+summary.RainSlideThresh <- function(object, ...){
+
+    cat("Cumulated event rainfall duration (ED) threshold\n")
+    cat("Method:", object$setting$method, "\n")
+    cat("Bootstrapping: ", object$setting$bootstrapping,
+        " Boot-Median: ", object$setting$use.bootMedian,
+        " Normal-Approx.: ", object$setting$use.normal, "\n")
+    cat("\n")
+
+    if(object$setting$method != "NLS")
+    {
+        cat("alpha: ", object$alpha, " gamma: ", object$gamma, "\n")
+        cat("E = ", object$alpha %>% round(x = ., digits = 3), " D^", object$gamma %>% round(x = ., digits = 3), "\n")
+
+        if(object$setting$trans.log10 == TRUE){
+            cat("\nEquation in log-log scale:\n")
+            cat("y = ", object$alpha %>% log10(.) %>% round(x = ., digits = 3), " x^", object$gamma %>% round(x = ., digits = 3), "\n")
+        }
+
+    } else {
+        cat("alpha: ", object$alpha, " gamma: ", object$gamma, " t: ", object$t, "\n")
+        cat("E = ", object$t %>% round(x = ., digits = 3), " + ", object$alpha %>% round(x = ., digits = 3), " D^", object$gamma %>% round(x = ., digits = 3), "\n")
+    }
+
+    if(object$setting$bootstrapping)
+    {
+        cat("\nBootstrapped confidence intervals:\n")
+        cat("alpha:\t", "+", object$boot$alpha$q95_sigma, "\t", "-", object$boot$alpha$q5_sigma, "\n")
+        cat("gamma:\t", "+", object$boot$gamma$q95, "\t", "-", object$boot$gamma$q5, "\n")
+
+        if(object$setting$method == "NLS")
+        {
+               cat("t:\t", "+", object$boot$t$q95_sigma, "\t", "-", object$boot$t$q5_sigma, "\n")
+        }
+    }
+
+}
+
+

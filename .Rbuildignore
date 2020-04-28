@@ -1,2 +1,6 @@
 ^RainSlide\.Rproj$
 ^\.Rproj\.user$
+^\.travis\.yml$
+^\testing.R
+testing.R
+^README\.Rmd$

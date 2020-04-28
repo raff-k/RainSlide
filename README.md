@@ -21,8 +21,8 @@ landslides. In RainSlide the following analytic tools are implemented:
   - **thresh** based on [Peruccacci et
     al. 2012](https://doi.org/10.1016/j.geomorph.2011.10.005) and
     [Rossi et al. 2017](https://doi.org/10.1016/j.geomorph.2017.02.001):
-    Calculation of cumulated event rainfall–rainfall duration (ED)
-    thresholds using the frequentist method.
+    Calculation of cumulated event rainfall–duration (ED) thresholds
+    using the frequentist method.
 
 The programming code is based on the references, but may vary slightly
 due to R-specifications or computational performance reasons.
