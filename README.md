@@ -14,10 +14,11 @@ landslides. In RainSlide the following analytic tools are implemented:
     of the effective surveyed area. The original Python script was
     translated to R and adapted to fit the raster-requirements. For
     computation GRASS GIS is required.
-  - **CTRL** based on [Melillo et
+  - **event** based on [Melillo et
     al. 2014](https://doi.org/10.1007/s10346-014-0471-3) and
-    [2018](https://doi.org/10.1016/j.envsoft.2018.03.024): Calculation
-    of thresholds for rainfall-induced landslides.
+    [2018](https://doi.org/10.1016/j.envsoft.2018.03.024): Objective
+    reconstruction of rainfall events responsible for landslides. The
+    rainfall threshold is calculated using Rainslide::thresh.
   - **thresh** based on [Peruccacci et
     al. 2012](https://doi.org/10.1016/j.geomorph.2011.10.005) and
     [Rossi et al. 2017](https://doi.org/10.1016/j.geomorph.2017.02.001):
