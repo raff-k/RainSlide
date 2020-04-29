@@ -100,3 +100,13 @@ summary.RainSlideThresh <- function(object, ...){
 }
 
 
+
+
+#' @name predict
+#' @param objecta a model object of class ainSlideThresh for which prediction is desired.
+#' @method predict RainSlideThresh
+#' @export
+predict.RainSlideThresh <- function(object, ...){
+    object$model %>% stats::predict(object = ., ...)
+}
+

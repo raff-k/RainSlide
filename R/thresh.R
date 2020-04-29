@@ -83,8 +83,17 @@ thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, tra
     }
 
     m.fit <- m %>% stats::predict(.)
-    m.res <- m %>% stats::residuals(.)
+    m.res <- m %>% stats::residuals(.) %>% as.numeric(.)
     m.coef <- m %>% stats::coef(.)
+
+    if(method == "QR"){
+        m.res.df <- m %>% summary(.) %>% .$rdf
+    } else {
+        m.res.df <- m %>% stats::df.residual(.)
+    }
+
+    m.dev <- m.res %>% .^2 %>% sum(., na.rm = TRUE) # stats::deviance()
+
 
     if (method == "NLS") {
         m.coef <- m.coef[c(2, 3, 1)]
@@ -157,13 +166,27 @@ thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, tra
         ## FROM: 'CTRL-T_code.R' Kernel density calculation ReD.PDF <- stats::density(x = m.ReD.Res, bw = 'nrd0', kernel =
         ## 'gaussian', adjust = 1, from = -1, to = 1) Maximum likelihood fit
         m.PDF <- m.res %>% MASS::fitdistr(x = ., densfun = "normal")
-        m.PDF.sigma <- m.PDF %>% stats::coef(.) %>% .[["sd"]]  # standard deviation from nomal approximation
+        m.PDF.sigma <- m.PDF %>% stats::coef(.) %>% .[["sd"]]  # the estimated standard errors
 
     } else {
         m.PDF <- NULL
-        m.PDF.sigma <- m.res %>% stats::sd(x = ., na.rm = TRUE)
+
+        if(method == "QR"){
+            # calculate standard deviation
+            m.PDF.sigma <- m.res %>% stats::sd(x = ., na.rm = TRUE)
+
+        } else {
+            # calculate standard error
+            m.PDF.sigma <- sqrt(m.dev/m.res.df) # sqrt(stats::deviance(.)/stats::df.residual(.))
+        }
+
     }
 
+    if(method != "NLS"){
+        # calulate frequentist probability for each point
+        m.res.sd <- (m.res-mean(m.res, na.rm = TRUE))/m.PDF.sigma # studentized residuals; use standard error instead of standard deviation
+        data$fprob <- m.res.sd %>% stats::pnorm(q = ., lower.tail = TRUE)
+    }
 
     # ... get Intercept of probablilty level ----------------
     if (method %in% c("LS", "QR"))
@@ -222,6 +245,8 @@ thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, tra
 
 
         }  # end of NLS
+
+    data <- data %>% dplyr::mutate(delta = Re - fit)
 
     # get time of process
     process.time.run <- proc.time() - process.time.start
