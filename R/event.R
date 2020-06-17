@@ -13,7 +13,7 @@
 #' @param sub.RainEvent examine potential sub-rain-events of critical rainfall event. Default: TRUE
 #' @param all.RainEvent if TRUE, all rain events in data are extracted. By setting this option, no critival rain event metrics are computed. Default: FALSE
 #' @param cumu.RainFall vector containing time intervals for cumulative rainfall. I.e. c(24, 48, 96) for 1, 2 and 4 days aggregation. Default: NULL
-#' @param return.DataFrame only the rain events are returned as a data.frame. Default: FALSE
+#' @param return.DataFrame only the rain events are returned as a data.frame. Default: TRUE
 #' @param S1.rainThresh isolated rainfall measurements below this thresholds are removed in the first step. Default: 0.2
 #' @param S3.rainThresh exclusion of irrelevant rainfall sub-events under and equal to this threshold (third step). Default: 1 (in mm)
 #' @param S1.rainOffLength dry periods between isolated rain events in the first step. Default: c(3, 6) (hours). When dates is NULL, then the smallest values is used for separation.
@@ -44,7 +44,7 @@
 #'
 #'
 #' @export
-event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.RainEvent = TRUE, all.RainEvent = FALSE, cumu.RainFall = NULL, return.DataFrame = FALSE,
+event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub.RainEvent = TRUE, all.RainEvent = FALSE, cumu.RainFall = NULL, return.DataFrame = TRUE,
                              S1.rainThresh = 0.2, S3.rainThresh = 1, S1.rainOffLength = c(3, 6), S2.rainOffLength = c(6, 12), S4.rainOffLength = c(48, 96),
                              RD = NULL, MAP = NULL, RDN = MAP/RD, index.month.warm.season = c(4, 10), force.limit = NULL)
 {
@@ -201,18 +201,23 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
                                     index.month.warm.season = index.month.warm.season)
 
   # ... set irrelevant rainfall depening on threshold to 0
-  x[S1.isolRF[which(x[S1.isolRF] <= S1.rainThresh)]] <- 0 # THRESHOLD MUST BE DEFINED!!!!!!
+  x[S1.isolRF$index[which(x[S1.isolRF$index] <= S1.rainThresh)]] <- 0 # THRESHOLD MUST BE DEFINED!!!!!!
 
 
 
 
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ## Step 2: Identification of rainfall sub-events ----------------------------------------------
-  S2.DryPeriods <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S2.rainOffLength,
-                                        op.rainThresh = "==", op.rainOffLength = ">=",
-                                        index.month.warm.season = index.month.warm.season)
-  S2.RainEvents <- .findRainEvent(x = x, x.pos.dryPeriods = S2.DryPeriods)
+  # S2.DryPeriods <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S2.rainOffLength,
+  #                                       op.rainThresh = "==", op.rainOffLength = ">=",
+  #                                       index.month.warm.season = index.month.warm.season)
+  # S2.RainEvents <- .findRainEvent(x = x, x.pos.dryPeriods = S2.DryPeriods)
 
+  S2.isolRF <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S2.rainOffLength,
+                                         op.rainThresh = ">", op.rainOffLength = ">=",
+                                         index.month.warm.season = index.month.warm.season)
+  # debugonce(.findRainEvent)
+  S2.RainEvents <- S2.isolRF$index_list
 
   # ... sum of precipitation of sub-rain-events
   S2.RE.sum <- sapply(X = S2.RainEvents, FUN = function(X, precip) {
@@ -238,10 +243,16 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   ## Step 4/5: Identification of rainfall events --------------------------------------------------
-  S4.DryPeriods <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S4.rainOffLength,
-                                        op.rainThresh = "==", op.rainOffLength = ">=",
-                                        index.month.warm.season = index.month.warm.season)
-  S4.RainEvents <- .findRainEvent(x = x, x.pos.dryPeriods = S4.DryPeriods)
+  # S4.DryPeriods <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S4.rainOffLength,
+  #                                       op.rainThresh = "==", op.rainOffLength = ">=",
+  #                                       index.month.warm.season = index.month.warm.season)
+  # S4.RainEvents <- .findRainEvent(x = x, x.pos.dryPeriods = S4.DryPeriods)
+
+  S4.isolRF <- .findRainFallPosition(x = x, dates = dates, rainThresh = c(0,0), rainOffLength = S4.rainOffLength,
+                                     op.rainThresh = ">", op.rainOffLength = ">=",
+                                     index.month.warm.season = index.month.warm.season)
+  # debugonce(.findRainEvent)
+  S4.RainEvents <- S4.isolRF$index_list
 
   ## ... get rainfall metrics
   # general
@@ -302,11 +313,11 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     if(all.RainEvent)
     {
-      # ... find all sub events
+      # ... find all sub events ------------------------------------
       cERM.S6.SubEvents <- lapply(X = 1:length(S4.RainEvents), FUN = function(i, S4RE, S3RE, precip, dates, RD, MAP, RDN)
       {
 
-           # ... get max and min index
+        # ... get max and min index
         # ... ... find nearest min index
         S3RE.minIndices <- sapply(X = S3RE, FUN = min)
         S4RE.minIndex.pos <- unname(which.min(abs(S3RE.minIndices - min(S4RE[[i]]))))
@@ -320,8 +331,20 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         S6SRE.check.max <- sapply(X = S3RE, FUN = function(x, maxIndex){max(x) <= maxIndex}, maxIndex = S4RE.maxIndex)
         S6SE <- S3RE[which(S6SRE.check.min & S6SRE.check.max)]
 
+        if(length(S6SE) == 1 && identical(unname(unlist(S6SE)), S4RE[[i]])) return(NULL) # sub-event and event are identica
+
+        # aggregated events
+        if(length(S6SE) > 1){
+          S6SE.agg <- lapply(X = 1:(length(S6SE)-1), l = S6SE,
+                                     FUN = function(i, l){unlist(x = l[1:i], use.names = FALSE)})
+
+        } else {
+          S6SE.agg <- S6SE
+        }
+
+
         # ... calculate rainfall metrics
-        cERM.sub <- .calcEventRainfallMetrics(x = precip, dates = dates, list.RainEvents = S6SE, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
+        cERM.sub <- .calcEventRainfallMetrics(x = precip, dates = dates, list.RainEvents = S6SE.agg, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
         names(cERM.sub) <- paste0(names(cERM.sub), "_", stringr::str_pad(string = i, width = 2, side = "left", pad = "0")) # naming
 
         return(cERM.sub)
@@ -351,9 +374,19 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
       S6.SubEvents.check <- sapply(X = S3.RainEvents, FUN = function(x, maxIndex){max(x) <= maxIndex}, maxIndex = S4.RainEvents.maxIndex)
       S6.SubEvents <- S3.RainEvents[which(S6.SubEvents.check)]
 
+      # aggregated events
+      if(length(S6.SubEvents) > 1){
+        S6.SubEvents.agg <- lapply(X = 1:(length(S6.SubEvents)-1), l = S6.SubEvents,
+                                   FUN = function(i, l){unlist(x = l[1:i], use.names = FALSE)})
+
+      } else {
+        S6.SubEvents.agg <- S6.SubEvents
+      }
+
+
       # if(length(S6.SubEvents) > 1) # > 1, because 1 would be similar to the critical rainfall event
       # {
-      cERM.sub <- .calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S6.SubEvents, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
+      cERM.sub <- .calcEventRainfallMetrics(x = x, dates = dates, list.RainEvents = S6.SubEvents.agg, modus = "sub", RD = RD, MAP = MAP, RDN = RDN)
       res <- c(res, cERM.sub)
       # }
     } # end of if(all.RainEvent)
@@ -382,6 +415,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         # ... get and remove number of sub-events
         extr.sRENum.pos <- grep(pattern = "sRE_number_.", x = names(res)) # ... get positions
         extr.sRENum <- res[extr.sRENum.pos] # ... get number of sub events
+        extr.sRENum.id <- as.numeric(gsub(pattern = "sRE_number_", replacement = "", x = names(extr.sRENum)))
         res <- res[-extr.sRENum.pos] # remove this variable from results
 
         extr.sREWeight.pos <- grep(pattern = "sRE_weightIntensity_.", x = names(res)) # ... get positions
@@ -406,8 +440,22 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         # ... ... data.frame
         res.df.main <- data.frame(matrix(res[1:(startSub-1)], ncol = ((startSub-1)/length(S4.RainEvents))))
         colnames(res.df.main) <- res.df.main.ColName # re-name columns
-        res.df.main$sRE_number <- extr.sRENum # add number of sub-events
-        res.df.main <- cbind(res.df.main, sREWeight.df) # weightesIntensitiy data.frame
+
+        sRe.missing <- setdiff(1:nrow(res.df.main), extr.sRENum.id)
+        extr.sRENum_filled <- extr.sRENum
+
+        # fill up missing data
+        for(m in sort(sRe.missing))
+        {
+          extr.sRENum_filled <- R.utils::insert(x = extr.sRENum_filled,
+                                         ats = m,
+                                         values = 0) # add number of sub-events
+          sREWeight.df <- dplyr::add_row(sREWeight.df, sRE_weightIntensity = NA, .before = m)
+        }
+
+        res.df.main$sRE_number <- extr.sRENum_filled
+        res.df.main <- cbind(res.df.main,
+                             sREWeight.df) # weightesIntensitiy data.frame
         res.df.main$ID <- c(1:nrow(res.df.main))*100 # id for ordering later
 
 
@@ -417,14 +465,16 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         res.df.sub.ColName <- unique(gsub(pattern = "^s|_[[:digit:]].*", replacement = "", x = res.df.sub.ColName.all)) # adapt colnames
 
         res.df.sub.ColName.order <- lapply(X = res.df.sub.ColName, FUN = function(x, all.n, startSub){
-          return(grep(pattern = x, x = all.n) + startSub -1)
+          # return(grep(pattern = x, x = all.n) + startSub -1)
+          return(grep(pattern = paste0(x, "_[[:digit:]].*"), x = all.n) + startSub -1)
         }, all.n = res.df.sub.ColName.all, startSub = startSub) %>% unlist(.)
 
 
         # ... ... data.frame
         res.df.sub <- data.frame(matrix(res[res.df.sub.ColName.order], ncol = ((startSub-1)/length(S4.RainEvents)))) # startSub:length(res)
         colnames(res.df.sub) <- res.df.sub.ColName # re-name columns
-        res.df.sub$ID <- unlist(sapply(X = 1:length(extr.sRENum), FUN = function(i, x){i*100 + seq(1:extr.sRENum[i])}, x = extr.sRENum)) # get ID variables
+        # res.df.sub$ID <- unlist(sapply(X = 1:length(extr.sRENum), FUN = function(i, x){i*100 + seq(1:extr.sRENum[i])}, x = extr.sRENum)) # get ID variables
+        res.df.sub$ID <- unlist(mapply(i = extr.sRENum.id, j = extr.sRENum, FUN = function(i, j){i*100 + seq(1:j)}, SIMPLIFY = FALSE, USE.NAMES = FALSE))
 
         # ... row-bind data frames
         res.df <- dplyr::bind_rows(res.df.main, res.df.sub)
@@ -461,7 +511,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         res.df.sub <- data.frame(matrix(res.df[startSub:length(res.df)], ncol = length(c(1:(startSub-1)))))
 
         # ... combine both data.frames
-        if(length(S6.SubEvents) > 1) # if there is only 1 sub-event, the event is not returned!!!!
+        if(length(S6.SubEvents.agg) > 1) # if there is only 1 sub-event, the event is not returned!!!!
         {
           res.df <- rbind(res.df.main, res.df.sub)
         } else {
@@ -484,9 +534,9 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         # ... add new columns to result
         res.df <- cbind(res.df, items.df)
 
-        if(length(S6.SubEvents) > 1) # if there is only 1 sub-event, the event is not returned!!!!
+        if(length(S6.SubEvents.agg) > 1) # if there is only 1 sub-event, the event is not returned!!!!
         {
-          rownames(res.df) <- c("cRE", paste0("sRE", c(1:length(S6.SubEvents))))
+          rownames(res.df) <- c("cRE", paste0("sRE", c(1:length(S6.SubEvents.agg))))
         } else {
           rownames(res.df) <- "cRE"
         }
@@ -596,7 +646,8 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
 
   ## duration of rain events
-  RE.dur <- sapply(X = list.RainEvents, FUN = length)
+  RE.durRain <- sapply(X = list.RainEvents, FUN = length) # actual rainy elements
+  RE.dur <- sapply(X = list.RainEvents, FUN = function(x) max(x)-min(x)+1) # entire period
 
 
   ## number of rain events
@@ -650,10 +701,17 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
     cRE.dur <- RE.dur[[1]]
     names(cRE.dur) <- "cRE_duration"
 
+    ## critical event rainfall duration for only rainy days (Rain)
+    cRE.durRain <- RE.durRain[[1]]
+    names(cRE.durRain) <- "cRE_duration_Rain"
 
     ## critical event rainfall intensity
     cRE.ID <- cRE.sum/cRE.dur
     names(cRE.ID) <- "cRE_Intensity"
+
+    ## critical event rainfall intensity
+    cRE.ID.Rain <- cRE.sum/cRE.durRain
+    names(cRE.ID.Rain) <- "cRE_Intensity_Rain"
 
     # normalizations
     if(!is.null(MAP)){cRE.ID.MAP <- cRE.sum.MAP/cRE.dur; names(cRE.ID.MAP) <- "cRE_Intensity_MAP"}
@@ -692,11 +750,16 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
     names(RE.sum) <-  paste0("sRE_sum_", stringr::str_pad(string = c(1:rainEvent.nb), width = 2, side = "left", pad = "0"))
     names(RE.max) <-  paste0("sRE_max_", stringr::str_pad(string = c(1:rainEvent.nb), width = 2, side = "left", pad = "0"))
     names(RE.dur) <-  paste0("sRE_dur_", stringr::str_pad(string = c(1:rainEvent.nb), width = 2, side = "left", pad = "0"))
-
+    names(RE.durRain) <-  paste0("sRE_dur_Rain_", stringr::str_pad(string = c(1:rainEvent.nb), width = 2, side = "left", pad = "0"))
 
     ## rainfall intensity
     RE.ID <- RE.sum/RE.dur
     names(RE.ID) <- paste0("sRE_Intensity_", stringr::str_pad(string = c(1:rainEvent.nb), width = 2, side = "left", pad = "0"))
+
+    ## rainfall intensity (only rainy days)
+    RE.ID.Rain <- RE.sum/RE.durRain
+    names(RE.ID.Rain) <- paste0("sRE_Intensity_Rain_", stringr::str_pad(string = c(1:rainEvent.nb), width = 2, side = "left", pad = "0"))
+
 
     # normalizations c(rainEvent.nb, RE.sum, RE.max, RE.dur, RE.ID)
     if(!is.null(MAP))
@@ -768,14 +831,14 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     if(modus == "main")
     {
-      res <- c(RE.tot, rainEvent.nb, RE.wID, RE.wID.MAP, cRE.sum, cRE.sum.MAP, cRE.max, cRE.dur, cRE.ID, cRE.ID.MAP, cRE.range.start, cRE.range.end)
-      # names(res) <- c("RE_total", "RE_number", "RE_weightIntensity", "RE_weightIntensity_MAP", "cRE_sum", "cRE_sum_MAP", "cRE_max", "cRE_duration", "cRE_Intensity", "cRE_Intensity_MAP", "cRE_range_start", "cRE_range_end")
+      res <- c(RE.tot, rainEvent.nb, RE.wID, RE.wID.MAP, cRE.sum, cRE.sum.MAP, cRE.max, cRE.dur, cRE.durRain, cRE.ID, cRE.ID.Rain, cRE.ID.MAP, cRE.range.start, cRE.range.end)
+      # names(res) <- c("RE_total", "RE_number", "RE_weightIntensity", "RE_weightIntensity_MAP", "cRE_sum", "cRE_sum_MAP", "cRE_max", "cRE_duration", cRE_duration_Rain", "cRE_Intensity", "cRE_Intensity_Rain", "cRE_Intensity_MAP", "cRE_range_start", "cRE_range_end")
       if(!is.null(dates)){res <- c(res, cRE.date.start, cRE.date.end)}
     }
 
     if(modus == "sub")
     {
-      res <- c(rainEvent.nb, RE.sum, RE.sum.MAP, RE.max, RE.dur, RE.ID, RE.ID.MAP, RE.wID, RE.wID.MAP, RE.range.start, RE.range.end)
+      res <- c(rainEvent.nb, RE.sum, RE.sum.MAP, RE.max, RE.dur, RE.durRain, RE.ID, RE.ID.Rain, RE.ID.MAP, RE.wID, RE.wID.MAP, RE.range.start, RE.range.end)
       # names(res) <- c("sRE_number", paste0("sRE_sum_", c(1:rainEvent.nb)), paste0("sRE_sum_MAP_", c(1:rainEvent.nb)),
       #                 paste0("sRE_max_", c(1:rainEvent.nb)), paste0("sRE_dur_", c(1:rainEvent.nb)),
       #                 paste0("sRE_Intensity_", c(1:rainEvent.nb)), paste0("sRE_Intensity_MAP_", c(1:rainEvent.nb)),
@@ -788,14 +851,14 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     if(modus == "main")
     {
-      res <- c(RE.tot, rainEvent.nb, RE.wID, RE.wID.RD, cRE.sum, cRE.sum.RD, cRE.max, cRE.dur, cRE.ID, cRE.ID.RD, cRE.range.start, cRE.range.end)
+      res <- c(RE.tot, rainEvent.nb, RE.wID, RE.wID.RD, cRE.sum, cRE.sum.RD, cRE.max, cRE.dur, cRE.durRain, cRE.ID, cRE.ID.Rain, cRE.ID.RD, cRE.range.start, cRE.range.end)
       # names(res) <- c("RE_total", "RE_number", "RE_weightIntensity", "RE_weightIntensity_RD", "cRE_sum", "cRE_sum_RD", "cRE_max", "cRE_duration", "cRE_Intensity", "cRE_Intensity_RD", "cRE_range_start", "cRE_range_end")
       if(!is.null(dates)){res <- c(res, cRE.date.start, cRE.date.end)}
     }
 
     if(modus == "sub")
     {
-      res <- c(rainEvent.nb, RE.sum, RE.sum.RD, RE.max, RE.dur, RE.ID, RE.ID.RD, RE.wID,  RE.wID.RD, RE.range.start, RE.range.end)
+      res <- c(rainEvent.nb, RE.sum, RE.sum.RD, RE.max, RE.dur, RE.durRain, RE.ID, RE.ID.Rain, RE.ID.RD, RE.wID,  RE.wID.RD, RE.range.start, RE.range.end)
       # names(res) <- c("sRE_number", paste0("sRE_sum_", c(1:rainEvent.nb)), paste0("sRE_sum_RD_", c(1:rainEvent.nb)),
       #                 paste0("sRE_max_", c(1:rainEvent.nb)), paste0("sRE_dur_", c(1:rainEvent.nb)),
       #                 paste0("sRE_Intensity_", c(1:rainEvent.nb)), paste0("sRE_Intensity_RD_", c(1:rainEvent.nb)),
@@ -808,7 +871,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     if(modus == "main")
     {
-      res <- c(RE.tot, rainEvent.nb, RE.wID, RE.wID.MAP, RE.wID.RD, RE.wID.RDN, cRE.sum, cRE.sum.MAP, cRE.sum.RD, cRE.sum.RDN, cRE.max, cRE.dur, cRE.ID, cRE.ID.MAP, cRE.ID.RD, cRE.ID.RDN, cRE.range.start, cRE.range.end)
+      res <- c(RE.tot, rainEvent.nb, RE.wID, RE.wID.MAP, RE.wID.RD, RE.wID.RDN, cRE.sum, cRE.sum.MAP, cRE.sum.RD, cRE.sum.RDN, cRE.max, cRE.dur, cRE.durRain, cRE.ID, cRE.ID.Rain, cRE.ID.MAP, cRE.ID.RD, cRE.ID.RDN, cRE.range.start, cRE.range.end)
       # names(res) <- c("RE_total", "RE_number", "RE_weightIntensity", "RE_weightIntensity_MAP", "RE_weightIntensity_RD", "RE_weightIntensity_RDN",
       #                 "cRE_sum", "cRE_sum_MAP", "cRE_sum_RD", "cRE_sum_RDN", "cRE_max", "cRE_duration", "cRE_Intensity", "cRE_Intensity_MAP", "cRE_Intensity_RD", "cRE_Intensity_RDN", "cRE_range_start", "cRE_range_end")
       if(!is.null(dates)){res <- c(res, cRE.date.start, cRE.date.end)}
@@ -816,7 +879,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     if(modus == "sub")
     {
-      res <- c(rainEvent.nb, RE.sum, RE.sum.MAP, RE.sum.RD, RE.sum.RDN, RE.max, RE.dur, RE.ID, RE.ID.MAP, RE.ID.RD, RE.ID.RDN, RE.wID, RE.wID.MAP,  RE.wID.RD, RE.wID.RDN, RE.range.start, RE.range.end)
+      res <- c(rainEvent.nb, RE.sum, RE.sum.MAP, RE.sum.RD, RE.sum.RDN, RE.max, RE.dur, RE.durRain, RE.ID, RE.ID.Rain, RE.ID.MAP, RE.ID.RD, RE.ID.RDN, RE.wID, RE.wID.MAP,  RE.wID.RD, RE.wID.RDN, RE.range.start, RE.range.end)
       # names(res) <- c("sRE_number", paste0("sRE_sum_", c(1:rainEvent.nb)), paste0("sRE_sum_MAP_", c(1:rainEvent.nb)), paste0("sRE_sum_RD_", c(1:rainEvent.nb)), paste0("sRE_sum_RDN_", c(1:rainEvent.nb)),
       #                 paste0("sRE_max_", c(1:rainEvent.nb)), paste0("sRE_dur_", c(1:rainEvent.nb)),
       #                 paste0("sRE_Intensity_", c(1:rainEvent.nb)), paste0("sRE_Intensity_MAP_", c(1:rainEvent.nb)), paste0("sRE_Intensity_RD_", c(1:rainEvent.nb)), paste0("sRE_Intensity_RDN_", c(1:rainEvent.nb)),
@@ -829,14 +892,14 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     if(modus == "main")
     {
-      res <- c(RE.tot, rainEvent.nb, RE.wID, cRE.sum, cRE.max, cRE.dur, cRE.ID, cRE.range.start, cRE.range.end)
+      res <- c(RE.tot, rainEvent.nb, RE.wID, cRE.sum, cRE.max, cRE.dur, cRE.durRain, cRE.ID, cRE.ID.Rain, cRE.range.start, cRE.range.end)
       # names(res) <- c("RE_total", "RE_number", "RE_weightIntensity", "cRE_sum", "cRE_max", "cRE_duration", "cRE_Intensity", "cRE_range_start", "cRE_range_end")
       if(!is.null(dates)){res <- c(res, cRE.date.start, cRE.date.end)}
     }
 
     if(modus == "sub")
     {
-      res <- c(rainEvent.nb, RE.sum, RE.max, RE.dur, RE.ID, RE.wID, RE.range.start, RE.range.end)
+      res <- c(rainEvent.nb, RE.sum, RE.max, RE.dur, RE.durRain, RE.ID, RE.ID.Rain, RE.wID, RE.range.start, RE.range.end)
       # names(res) <- c("sRE_number", paste0("sRE_sum_", c(1:rainEvent.nb)), paste0("sRE_max_", c(1:rainEvent.nb)),
       #                 paste0("sRE_dur_", c(1:rainEvent.nb)), paste0("sRE_Intensity_", c(1:rainEvent.nb)),
       #                 paste0("sRE_range_start_", c(1:rainEvent.nb)), paste0("sRE_range_end_", c(1:rainEvent.nb)))
@@ -877,7 +940,6 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 .findRainFallPosition <- function(x, dates, rainThresh, rainOffLength, op.rainThresh, op.rainOffLength,
                                  index.month.warm.season)
 {
-  # browser()
 
   ## find position of rainfall under/over/equal to threshold | x OP rainThresh
   if(!is.null(dates))
@@ -902,39 +964,60 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
     # warm
     if(length(x.pos.rainThresh.warm) > 0)
     {
-      x.pos.rainThresh.C.warm <- split(seq_along(along.with = x.pos.rainThresh.warm), cumsum(c(0, diff(x.pos.rainThresh.warm) > 1)))
-      x.pos.rainThresh.CLen.warm <- unlist(x.pos.rainThresh.C.warm[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C.warm), rainOffLength[1])))])
+      x.pos.rainThresh.C.warm <- split(seq_along(along.with = x.pos.rainThresh.warm), cumsum(c(0, diff(x.pos.rainThresh.warm) > rainOffLength[1]))) # before 1
+      x.pos.rainThresh.C.warm.filt <- x.pos.rainThresh.C.warm[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C.warm), 1)))] # before rainOffLength[1]
+      x.pos.rainThresh.CLen.warm <- unlist(x.pos.rainThresh.C.warm.filt)
 
       x.pos.rainThresh.index.warm <- pos.warm[x.pos.rainThresh.warm[x.pos.rainThresh.CLen.warm]]
+      x.pos.rainThresh.index.warm.list <- lapply(X = x.pos.rainThresh.C.warm.filt,
+                                                 sub1 = pos.warm,
+                                                 sub2 = x.pos.rainThresh.warm,
+                                                 FUN = function(x, sub1, sub2){ sub1[sub2[x]] })
     } else {
       x.pos.rainThresh.index.warm <- NULL
+      .pos.rainThresh.index.warm.list <- NULL
     }
 
 
     # cold
     if(length(x.pos.rainThresh.cold) > 0)
     {
-      x.pos.rainThresh.C.cold <- split(seq_along(along.with = x.pos.rainThresh.cold), cumsum(c(0, diff(x.pos.rainThresh.cold) > 1)))
-      x.pos.rainThresh.CLen.cold <- unlist(x.pos.rainThresh.C.cold[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C.cold), rainOffLength[2])))])
+      x.pos.rainThresh.C.cold <- split(seq_along(along.with = x.pos.rainThresh.cold), cumsum(c(0, diff(x.pos.rainThresh.cold) > rainOffLength[2])))
+      x.pos.rainThresh.C.cold.filt <- x.pos.rainThresh.C.cold[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C.cold), 1)))]
+      x.pos.rainThresh.CLen.cold <- unlist(x.pos.rainThresh.C.cold.filt)
 
       x.pos.rainThresh.index.cold <- pos.cold[x.pos.rainThresh.cold[x.pos.rainThresh.CLen.cold]]
+      x.pos.rainThresh.index.cold.list <- lapply(X = x.pos.rainThresh.C.cold.filt,
+                                                 sub1 = pos.cold,
+                                                 sub2 = x.pos.rainThresh.cold,
+                                                 FUN = function(x, sub1, sub2){ sub1[sub2[x]] })
     } else {
       x.pos.rainThresh.index.cold <- NULL
+      x.pos.rainThresh.index.cold.list <- NULL
     }
 
     x.pos.rainThresh.index <- sort(c(x.pos.rainThresh.index.warm, x.pos.rainThresh.index.cold))
+
+    x.pos.rainThresh.index.list.merge <- c(x.pos.rainThresh.index.warm.list, x.pos.rainThresh.index.cold.list)
+    x.pos.rainThresh.index.list.order <- order(sapply(x.pos.rainThresh.index.list.merge, '[[', 1))
+    x.pos.rainThresh.index.list <- x.pos.rainThresh.index.list.merge[x.pos.rainThresh.index.list.order]
+
   } else {
 
     ## get consecutive positions under rainTreshold | lengths of event OP rainOffLength-Threshold
     # ## get consecutive positions under rainTreshold | lengths of event OP rainOffLength-Threshold
-    x.pos.rainThresh.C <- split(seq_along(along.with = x.pos.rainThresh), cumsum(c(0, diff(x.pos.rainThresh) > 1)))
-    x.pos.rainThresh.CLen <- unlist(x.pos.rainThresh.C[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C), rainOffLength)))])
+    x.pos.rainThresh.C <- split(seq_along(along.with = x.pos.rainThresh), cumsum(c(0, diff(x.pos.rainThresh) > rainOffLength)))
+    x.pos.rainThresh.C.filt <- x.pos.rainThresh.C[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C), 1)))]
+    x.pos.rainThresh.CLen <- unlist(x.pos.rainThresh.C.filt)
 
     x.pos.rainThresh.index <- x.pos.rainThresh[x.pos.rainThresh.CLen]
+    x.pos.rainThresh.index.list <- lapply(X = x.pos.rainThresh.C.filt,
+                                          sub1 = x.pos.rainThresh,
+                                          FUN = function(x, sub1){ sub1[x] })
   }
 
 
-  return(x.pos.rainThresh.index)
+  return(list(index = x.pos.rainThresh.index, index_list = x.pos.rainThresh.index.list))
 
 } # end of function findIsolatedRainEvent
 

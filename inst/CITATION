@@ -1,0 +1,31 @@
+citEntry(entry = "Manual",
+         title = "RainSlide: Rainfall-induced landslide analysis tools",
+         author = personList(as.person("Raphael Knevels")),
+         year = "2020",
+         note = "R package version 0.0.0-9000",
+         url = "https://github.com/raff-k/RainSlide",
+         header = "To cite the 'RainSlide' package use:",
+         textVersion =
+           paste("Knevels, R. 2020",
+                 "RainSlide: Rainfall-induced landslide analysis tools.",
+                 "R package version 0.0.0-9001.",
+                 "https://github.com/raff-k/RainSlide")
+)
+
+citEntry(entry="Article",
+  author = personList(as.person("Raphael Knevels"),
+                      as.person("Helene Petschko"),
+		                  as.person("Herwig Proske"),
+		                  as.person("Philip Leopold"),
+		                  as.person("Douglas Maraun"),
+		                  as.person("Alexander Brenning")),
+  title = "{Event-Based Landslide Modeling in the Styrian Basin, Austria: Accounting for Time-Varying Rainfall and Land Cover}",
+  year = 2020,
+  journal = "{Geosciences}",
+  doi = "10.3390/geosciences10060217",
+  url = "https://doi.org/10.3390/geosciences10060217",
+  pages = "217",
+  volume = 10,
+  number = 6,
+  textVersion = "Knevels, R.; Petschko, H.; Proske, H.; Leopold, P.; Maraun, D.; Brenning, A., 2020. Event-Based Landslide Modeling in the Styrian Basin, Austria: Accounting for Time-Varying Rainfall and Land Cover. Geosciences 10 (6), 217. https://doi.org/10.3390/geosciences10060217"
+)

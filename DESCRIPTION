@@ -1,8 +1,8 @@
 Package: RainSlide
 Type: Package
 Title: Rainfall-induced landslide analysis tools
-Version: 0.0.0-9000
-Date: 2020-04-27
+Version: 0.0.0-9001
+Date: 2020-06-17
 Authors@R: c(
         person("Raphael", "Knevels", 
         email = "raphael.knevels@uni-jena.de",
@@ -32,6 +32,7 @@ Imports:
          stats,
          stringr,
          raster,
+         R.utils,
          zoo
 Suggests: 
          link2GI,

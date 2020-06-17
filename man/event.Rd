@@ -12,7 +12,7 @@ event(
   sub.RainEvent = TRUE,
   all.RainEvent = FALSE,
   cumu.RainFall = NULL,
-  return.DataFrame = FALSE,
+  return.DataFrame = TRUE,
   S1.rainThresh = 0.2,
   S3.rainThresh = 1,
   S1.rainOffLength = c(3, 6),
@@ -40,7 +40,7 @@ event(
 
 \item{cumu.RainFall}{vector containing time intervals for cumulative rainfall. I.e. c(24, 48, 96) for 1, 2 and 4 days aggregation. Default: NULL}
 
-\item{return.DataFrame}{only the rain events are returned as a data.frame. Default: FALSE}
+\item{return.DataFrame}{only the rain events are returned as a data.frame. Default: TRUE}
 
 \item{S1.rainThresh}{isolated rainfall measurements below this thresholds are removed in the first step. Default: 0.2}
 
