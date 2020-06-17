@@ -964,7 +964,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
     # warm
     if(length(x.pos.rainThresh.warm) > 0)
     {
-      x.pos.rainThresh.C.warm <- split(seq_along(along.with = x.pos.rainThresh.warm), cumsum(c(0, diff(x.pos.rainThresh.warm) > rainOffLength[1]))) # before 1
+      x.pos.rainThresh.C.warm <- split(seq_along(along.with = x.pos.rainThresh.warm), cumsum(c(0, (diff(x.pos.rainThresh.warm)-1) > rainOffLength[1]))) # before 1
       x.pos.rainThresh.C.warm.filt <- x.pos.rainThresh.C.warm[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C.warm), 1)))] # before rainOffLength[1]
       x.pos.rainThresh.CLen.warm <- unlist(x.pos.rainThresh.C.warm.filt)
 
@@ -975,14 +975,14 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
                                                  FUN = function(x, sub1, sub2){ sub1[sub2[x]] })
     } else {
       x.pos.rainThresh.index.warm <- NULL
-      .pos.rainThresh.index.warm.list <- NULL
+      x.pos.rainThresh.index.warm.list <- NULL
     }
 
 
     # cold
     if(length(x.pos.rainThresh.cold) > 0)
     {
-      x.pos.rainThresh.C.cold <- split(seq_along(along.with = x.pos.rainThresh.cold), cumsum(c(0, diff(x.pos.rainThresh.cold) > rainOffLength[2])))
+      x.pos.rainThresh.C.cold <- split(seq_along(along.with = x.pos.rainThresh.cold), cumsum(c(0, (diff(x.pos.rainThresh.cold)-1) > rainOffLength[2])))
       x.pos.rainThresh.C.cold.filt <- x.pos.rainThresh.C.cold[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C.cold), 1)))]
       x.pos.rainThresh.CLen.cold <- unlist(x.pos.rainThresh.C.cold.filt)
 
@@ -1006,7 +1006,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     ## get consecutive positions under rainTreshold | lengths of event OP rainOffLength-Threshold
     # ## get consecutive positions under rainTreshold | lengths of event OP rainOffLength-Threshold
-    x.pos.rainThresh.C <- split(seq_along(along.with = x.pos.rainThresh), cumsum(c(0, diff(x.pos.rainThresh) > rainOffLength)))
+    x.pos.rainThresh.C <- split(seq_along(along.with = x.pos.rainThresh), cumsum(c(0, (diff(x.pos.rainThresh)-1) > rainOffLength)))
     x.pos.rainThresh.C.filt <- x.pos.rainThresh.C[which(do.call(op.rainOffLength, list(lengths(x.pos.rainThresh.C), 1)))]
     x.pos.rainThresh.CLen <- unlist(x.pos.rainThresh.C.filt)
 
