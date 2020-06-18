@@ -699,11 +699,11 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
 
     ## critical event rainfall duration
     cRE.dur <- RE.dur[[1]]
-    names(cRE.dur) <- "cRE_duration"
+    names(cRE.dur) <- "cRE_dur"
 
     ## critical event rainfall duration for only rainy days (Rain)
     cRE.durRain <- RE.durRain[[1]]
-    names(cRE.durRain) <- "cRE_duration_Rain"
+    names(cRE.durRain) <- "cRE_dur_Rain"
 
     ## critical event rainfall intensity
     cRE.ID <- cRE.sum/cRE.dur
