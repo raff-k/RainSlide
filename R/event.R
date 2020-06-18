@@ -511,7 +511,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         res.df.sub <- data.frame(matrix(res.df[startSub:length(res.df)], ncol = length(c(1:(startSub-1)))))
 
         # ... combine both data.frames
-        if(length(S6.SubEvents.agg) > 1) # if there is only 1 sub-event, the event is not returned!!!!
+        if(length(S6.SubEvents.agg) >= 1) # if there is a sub-event?
         {
           res.df <- rbind(res.df.main, res.df.sub)
         } else {
@@ -534,7 +534,7 @@ event <- function(x, dates = NULL, timesteps = NULL, date.of.failure = NULL, sub
         # ... add new columns to result
         res.df <- cbind(res.df, items.df)
 
-        if(length(S6.SubEvents.agg) > 1) # if there is only 1 sub-event, the event is not returned!!!!
+        if(length(S6.SubEvents.agg) >= 1) # if there is only 1 sub-event?
         {
           rownames(res.df) <- c("cRE", paste0("sRE", c(1:length(S6.SubEvents.agg))))
         } else {
