@@ -37,3 +37,8 @@ You can install the latest version of RainSlide from [github](https://github.com
 # install.packages("devtools")
 devtools::install_github("raff-k/RainSlide")
 ```
+
+
+## Reference
+
+Knevels, R., Petschko, H., Proske, H., Leopold, P., Maraun, D., Brenning, A. (2020) Event-Based Landslide Modeling in the Styrian Basin, Austria: Accounting for Time-Varying Rainfall and Land Cover. Geosciences, 10, 217. https://doi.org/10.3390/geosciences10060217
