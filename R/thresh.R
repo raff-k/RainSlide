@@ -1,26 +1,22 @@
-#' @title Get rain event of a landslide
+#' @title Rainfall threshold for event-based landslide occurrences
 #'
-#' @description This function calcuates different precipitation characteristics for a specific time-series:
-#' total precipitation, number of rainfall events, weighted mean intensitiy of rainfall events (normalized by MAP, RD or RDN),
-#' cumulative critical event rainfall (normalized by MAP, RD or RDN), maximum rainfall during critical rainfall event,
-#' duration of critical rainfall event, critical rainfall intensitiy (normalized by MAP, RD or RDN), rainfall at day of failure (start date),
-#' rainfall intensity at day of failure (start date), maximum rainfall at day of failure (start date).
+#' @description This function uses statistical approaches to calculate landslide rainfall thresholds and to quantify their uncertainties.
 #'
 #' @param Re vector containing the rain event variable, e.g. cumulated event rainfall (in mm) or intensity (mm/h)
 #' @param D vector containing the duration of the rainfall events
-#' @param method method to compute threshold. Either 'LS' for least square, or 'NLS' for non-linear least squares Method. Default: 'nls'
+#' @param method method to compute threshold. Either 'LS' for least square, 'QR' for quantile regression, or 'NLS' for non-linear least squares Method. Default: 'LS'
 #' @param prob.thresh exceedance probability level. Default: 0.05 (5 percent)
 #' @param trans.log10 log-transformation of input vectors Re and/or D. Default: TRUE
 #' @param bootstrapping If TRUE bootstrapping is performed. Default: TRUE
 #' @param R the number of bootstrap replicates, see boot::boot() for more information. Default: 1000
 #' @param use.bootMedian Threshold is delineated from median of bootstrapping result. Default: FALSE
-#' @param use.normal Use normal approximation of residuals This method is descriped in literature. Default: FALSE
+#' @param use.normal Use normal approximation of residuals This method is described in literature. Default: FALSE
 #' @param nls.pw For NLS method, size of point-wise ED-pair filtering. Default: 10
 #' @param nls.tw For NLS method, size of time-wise ED-pair filtering. Default: 10
-#' @param nls.method Definde method for NLS ED-pair fitlering. Default: 'tw'
+#' @param nls.method Define method for NLS ED-pair filtering. Default: 'tw'
 #' @param nls.bounds bounds for finding NLS starting parameter. Default: list(lower = c(t = 0, alpha = 0, gamma = 0), upper = c(t = 500, alpha = 100, gamma = 10))
 #' @param seed replicable bootstrapping. Default: 123
-#' @param cores If cores > 1 than parallisation for bootstrapping is initialized via future backend. Default: 1
+#' @param cores If cores > 1 than palatalization for bootstrapping is initialized via future back-end. Default: 1
 #'
 #' @note The use of method = "NLS" is not recommended.
 #'
@@ -35,11 +31,11 @@
 #'   \item Guzzetti, F., Peruccacci, S., Rossi, M., & Stark, C. P. (2007). Rainfall thresholds for the initiation of landslides in central and southern Europe. Meteorology and atmospheric physics, 98(3-4), 239-267.
 #' }
 #'
-#' @keywords rainfall tresholds, rainfall event, landslide, automatic appraoch
+#' @keywords rainfall thresholds, rainfall event, landslide, automatic approach
 #'
 #'
 #' @export
-thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, trans.log10 = FALSE, bootstrapping = TRUE, R = 1000,
+thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, trans.log10 = TRUE, bootstrapping = TRUE, R = 1000,
     use.bootMedian = FALSE, use.normal = FALSE, nls.pw = 10, nls.tw = 10, nls.method = c("tw", "pw"), nls.bounds = list(lower = c(t = 0,
         alpha = 0, gamma = 0), upper = c(t = 500, alpha = 100, gamma = 10)), seed = 123, cores = 1) {
 
