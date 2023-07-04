@@ -1,5 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+[![R-CMD-check](https://github.com/raff-k/RainSlide/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/raff-k/RainSlide/actions/workflows/R-CMD-check.yaml)
 <!-- [![Build Status](https://api.travis-ci.org/raff-k/RainSlide.svg?branch=master)](https://travis-ci.org/raff-k/RainSlide) -->
 
 # RainSlide: Rainfall-induced landslide analysis tools
