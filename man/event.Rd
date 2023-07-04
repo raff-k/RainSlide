@@ -36,7 +36,7 @@ event(
 
 \item{sub.RainEvent}{examine potential sub-rain-events of critical rainfall event. Default: TRUE}
 
-\item{all.RainEvent}{if TRUE, all rain events in data are extracted. By setting this option, no critival rain event metrics are computed. Default: FALSE}
+\item{all.RainEvent}{if TRUE, all rain events in data are extracted. By setting this option, no critical rain event metrics are computed. Default: FALSE}
 
 \item{cumu.RainFall}{vector containing time intervals for cumulative rainfall. I.e. c(24, 48, 96) for 1, 2 and 4 days aggregation. Default: NULL}
 
@@ -56,21 +56,21 @@ event(
 
 \item{MAP}{mean annual precipitation, the long-term yearly average precipitation, see CRU - climate research units for number. Default: NULL}
 
-\item{RDN}{a climatic index that provides better description (or proxy) than the MAP for the occurence of extreme storm events (Guzzetti et al. 2006: 247). Default: MAP/RD}
+\item{RDN}{a climatic index that provides better description (or proxy) than the MAP for the occurrence of extreme storm events (Guzzetti et al. 2006: 247). Default: MAP/RD}
 
-\item{index.month.warm.season}{month indices of the warm season. First element is start, and second element represents the end (all including). Only relevant when dates are set. Default: c(4, 10) (including April, including Ocotober)}
+\item{index.month.warm.season}{month indices of the warm season. First element is start, and second element represents the end (all including). Only relevant when dates are set. Default: c(4, 10) (including April, including October)}
 
-\item{force.limit}{Usefull for standard output, if result is type list. Must be integer number of specific size. If result is smaller, than results gets filled with NA, otherwise cut to this size. Default: NULL}
+\item{force.limit}{Useful for standard output, if result is type list. Must be integer number of specific size. If result is smaller, than results gets filled with NA, otherwise cut to this size. Default: NULL}
 }
 \value{
 vector containing rainfall metrics (see description). If return.DataFrame is TRUE a data.frame is returned containing similar
 rain metrics for all rain events.
 }
 \description{
-This function calcuates different precipitation characteristics for a specific time-series:
-total precipitation, number of rainfall events, weighted mean intensitiy of rainfall events (normalized by MAP, RD or RDN),
+This function calculates different precipitation characteristics for a specific time-series:
+total precipitation, number of rainfall events, weighted mean intensity of rainfall events (normalized by MAP, RD or RDN),
 cumulative critical event rainfall (normalized by MAP, RD or RDN), maximum rainfall during critical rainfall event,
-duration of critical rainfall event, critical rainfall intensitiy (normalized by MAP, RD or RDN), rainfall at day of failure (start date),
+duration of critical rainfall event, critical rainfall intensity (normalized by MAP, RD or RDN), rainfall at day of failure (start date),
 rainfall intensity at day of failure (start date), maximum rainfall at day of failure (start date).
 }
 \note{

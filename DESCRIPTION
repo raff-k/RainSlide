@@ -12,9 +12,8 @@ Description: Tools for rainfall-induced landslide analysis.
 URL: https://github.com/raff-k/RainSlide
 BugReports: https://github.com/raff-k/RainSlide/issues
 License: GPL-3 + file LICENSE
-License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
 LazyData: true
 Depends: 

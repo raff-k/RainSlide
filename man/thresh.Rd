@@ -2,14 +2,14 @@
 % Please edit documentation in R/thresh.R
 \name{thresh}
 \alias{thresh}
-\title{Get rain event of a landslide}
+\title{Rainfall threshold for event-based landslide occurrences}
 \usage{
 thresh(
   Re,
   D,
   method = c("LS", "QR", "NLS"),
   prob.thresh = 0.05,
-  trans.log10 = FALSE,
+  trans.log10 = TRUE,
   bootstrapping = TRUE,
   R = 1000,
   use.bootMedian = FALSE,
@@ -28,7 +28,7 @@ thresh(
 
 \item{D}{vector containing the duration of the rainfall events}
 
-\item{method}{method to compute threshold. Either 'LS' for least square, or 'NLS' for non-linear least squares Method. Default: 'nls'}
+\item{method}{method to compute threshold. Either 'LS' for least square, 'QR' for quantile regression, or 'NLS' for non-linear least squares Method. Default: 'LS'}
 
 \item{prob.thresh}{exceedance probability level. Default: 0.05 (5 percent)}
 
@@ -40,29 +40,25 @@ thresh(
 
 \item{use.bootMedian}{Threshold is delineated from median of bootstrapping result. Default: FALSE}
 
-\item{use.normal}{Use normal approximation of residuals This method is descriped in literature. Default: FALSE}
+\item{use.normal}{Use normal approximation of residuals This method is described in literature. Default: FALSE}
 
 \item{nls.pw}{For NLS method, size of point-wise ED-pair filtering. Default: 10}
 
 \item{nls.tw}{For NLS method, size of time-wise ED-pair filtering. Default: 10}
 
-\item{nls.method}{Definde method for NLS ED-pair fitlering. Default: 'tw'}
+\item{nls.method}{Define method for NLS ED-pair filtering. Default: 'tw'}
 
 \item{nls.bounds}{bounds for finding NLS starting parameter. Default: list(lower = c(t = 0, alpha = 0, gamma = 0), upper = c(t = 500, alpha = 100, gamma = 10))}
 
 \item{seed}{replicable bootstrapping. Default: 123}
 
-\item{cores}{If cores > 1 than parallisation for bootstrapping is initialized via future backend. Default: 1}
+\item{cores}{If cores > 1 than palatalization for bootstrapping is initialized via future back-end. Default: 1}
 }
 \value{
 vector containing rainfall metrics (see description). If return.DataFrame is TRUE a data.frame is returned containing similar rain metrics for all rain events.
 }
 \description{
-This function calcuates different precipitation characteristics for a specific time-series:
-total precipitation, number of rainfall events, weighted mean intensitiy of rainfall events (normalized by MAP, RD or RDN),
-cumulative critical event rainfall (normalized by MAP, RD or RDN), maximum rainfall during critical rainfall event,
-duration of critical rainfall event, critical rainfall intensitiy (normalized by MAP, RD or RDN), rainfall at day of failure (start date),
-rainfall intensity at day of failure (start date), maximum rainfall at day of failure (start date).
+This function uses statistical approaches to calculate landslide rainfall thresholds and to quantify their uncertainties.
 }
 \note{
 The use of method = "NLS" is not recommended.
@@ -74,9 +70,9 @@ The use of method = "NLS" is not recommended.
 \item Guzzetti, F., Peruccacci, S., Rossi, M., & Stark, C. P. (2007). Rainfall thresholds for the initiation of landslides in central and southern Europe. Meteorology and atmospheric physics, 98(3-4), 239-267.
 }
 }
-\keyword{appraoch}
+\keyword{approach}
 \keyword{automatic}
 \keyword{event,}
 \keyword{landslide,}
 \keyword{rainfall}
-\keyword{tresholds,}
+\keyword{thresholds,}
