@@ -4,3 +4,4 @@
 ^\testing.R
 testing.R
 ^README\.Rmd$
+^\.github$
