@@ -52,7 +52,7 @@ thresh(
 
 \item{seed}{replicable bootstrapping. Default: 123}
 
-\item{cores}{If cores > 1 than palatalization for bootstrapping is initialized via future back-end. Default: 1}
+\item{cores}{If cores > 1 than parallelisation for bootstrapping is initialized via future back-end. Default: 1}
 }
 \value{
 vector containing rainfall metrics (see description). If return.DataFrame is TRUE a data.frame is returned containing similar rain metrics for all rain events.

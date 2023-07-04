@@ -16,7 +16,7 @@
 #' @param nls.method Define method for NLS ED-pair filtering. Default: 'tw'
 #' @param nls.bounds bounds for finding NLS starting parameter. Default: list(lower = c(t = 0, alpha = 0, gamma = 0), upper = c(t = 500, alpha = 100, gamma = 10))
 #' @param seed replicable bootstrapping. Default: 123
-#' @param cores If cores > 1 than palatalization for bootstrapping is initialized via future back-end. Default: 1
+#' @param cores If cores > 1 than parallelisation for bootstrapping is initialized via future back-end. Default: 1
 #'
 #' @note The use of method = "NLS" is not recommended.
 #'
