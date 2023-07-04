@@ -25,6 +25,7 @@ Imports:
          future,
          future.apply,
          ggplot2,
+         magrittr,
          MASS,
          methods,
          rgrass7,
@@ -37,7 +38,6 @@ Imports:
          zoo
 Suggests: 
          link2GI,
-         magrittr,
          testthat, 
          knitr,
          rmarkdown,
