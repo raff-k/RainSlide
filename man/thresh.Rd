@@ -38,7 +38,7 @@ thresh(
 
 \item{R}{the number of bootstrap replicates, see boot::boot() for more information. Default: 1000}
 
-\item{use.bootMedian}{Threshold is delineated from median of bootstrapping result. Default: FALSE}
+\item{use.bootMedian}{Threshold is delineated from median of bootstrapping result (i.e., regression is overwritten). Default: FALSE}
 
 \item{use.normal}{Use normal approximation of residuals. This method is described in literature. Default: FALSE}
 
