@@ -32,7 +32,7 @@ thresh(
 
 \item{prob.thresh}{exceedance probability level. Default: 0.05 (5 percent)}
 
-\item{trans.log10}{log-transformation of input vectors Re and/or D. Default: TRUE}
+\item{trans.log10}{log-transformation of input vectors Re and D. Default: TRUE}
 
 \item{bootstrapping}{If TRUE bootstrapping is performed. Default: TRUE}
 

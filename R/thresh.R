@@ -6,7 +6,7 @@
 #' @param D vector containing the duration of the rainfall events
 #' @param method method to compute threshold. Either 'LS' for least square, 'QR' for quantile regression, or 'NLS' for non-linear least squares Method. Default: 'LS'
 #' @param prob.thresh exceedance probability level. Default: 0.05 (5 percent)
-#' @param trans.log10 log-transformation of input vectors Re and/or D. Default: TRUE
+#' @param trans.log10 log-transformation of input vectors Re and D. Default: TRUE
 #' @param bootstrapping If TRUE bootstrapping is performed. Default: TRUE
 #' @param R the number of bootstrap replicates, see boot::boot() for more information. Default: 1000
 #' @param use.bootMedian Threshold is delineated from median of bootstrapping result. Default: FALSE
