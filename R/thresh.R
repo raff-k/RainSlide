@@ -196,12 +196,18 @@ thresh <- function(Re, D, method = c("LS", "QR", "NLS"), prob.thresh = 0.05, tra
             data$fit <- funct(x = data$D, alpha = alpha, gamma = gamma)
 
             if (bootstrapping) {
+
                 # ... confidence interval: shift of intercept
                 boot.result$alpha$q5_sigma <- boot.result$alpha$q5 - sigma.coef * m.PDF.sigma  # ... lower percentile
                 data$lower <- funct(x = data$D, alpha = boot.result$alpha$q5_sigma, gamma = gamma)
 
+                boot.result$alpha$q50_sigma <- boot.result$alpha$q50 - sigma.coef * m.PDF.sigma  # ... shift median
+
                 boot.result$alpha$q95_sigma <- boot.result$alpha$q95 - sigma.coef * m.PDF.sigma  # ... upper percentile
                 data$upper <- funct(x = data$D, alpha = boot.result$alpha$q95_sigma, gamma = gamma)
+
+                boot.result$alpha$mean_sigma <- boot.result$alpha$mean - sigma.coef * m.PDF.sigma  # ... shift mean
+
             }
 
             if (trans.log10) {
