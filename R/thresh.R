@@ -10,7 +10,7 @@
 #' @param bootstrapping If TRUE bootstrapping is performed. Default: TRUE
 #' @param R the number of bootstrap replicates, see boot::boot() for more information. Default: 1000
 #' @param use.bootMedian Threshold is delineated from median of bootstrapping result. Default: FALSE
-#' @param use.normal Use normal approximation of residuals This method is described in literature. Default: FALSE
+#' @param use.normal Use normal approximation of residuals. This method is described in literature. Default: FALSE
 #' @param nls.pw For NLS method, size of point-wise ED-pair filtering. Default: 10
 #' @param nls.tw For NLS method, size of time-wise ED-pair filtering. Default: 10
 #' @param nls.method Define method for NLS ED-pair filtering. Default: 'tw'
@@ -20,7 +20,7 @@
 #'
 #' @note The use of method = "NLS" is not recommended.
 #'
-#' @return vector containing rainfall metrics (see description). If return.DataFrame is TRUE a data.frame is returned containing similar rain metrics for all rain events.
+#' @return list object containing threshold metrics and settings (see description).
 #'
 #'
 #' @note

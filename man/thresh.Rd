@@ -40,7 +40,7 @@ thresh(
 
 \item{use.bootMedian}{Threshold is delineated from median of bootstrapping result. Default: FALSE}
 
-\item{use.normal}{Use normal approximation of residuals This method is described in literature. Default: FALSE}
+\item{use.normal}{Use normal approximation of residuals. This method is described in literature. Default: FALSE}
 
 \item{nls.pw}{For NLS method, size of point-wise ED-pair filtering. Default: 10}
 
@@ -55,7 +55,7 @@ thresh(
 \item{cores}{If cores > 1 than parallelisation for bootstrapping is initialized via future back-end. Default: 1}
 }
 \value{
-vector containing rainfall metrics (see description). If return.DataFrame is TRUE a data.frame is returned containing similar rain metrics for all rain events.
+list object containing threshold metrics and settings (see description).
 }
 \description{
 This function uses statistical approaches to calculate landslide rainfall thresholds and to quantify their uncertainties.
